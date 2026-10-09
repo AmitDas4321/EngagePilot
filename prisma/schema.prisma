@@ -1,0 +1,469 @@
+// ManyChat Alternative — B2B Instagram Comment → DM SaaS schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts         Account[]
+  ownedWorkspaces  Workspace[]           @relation("WorkspaceOwner")
+  workspaceMembers WorkspaceMember[]
+  sentInvitations  WorkspaceInvitation[] @relation("WorkspaceInvitationsSent")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  owner     User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usagePeriodStart  DateTime @default(now())
+  dmsSentThisPeriod Int      @default(0)
+
+  members           WorkspaceMember[]
+  invitations       WorkspaceInvitation[]
+  instagramAccounts InstagramAccount[]
+  automations       Automation[]
+  inboxAutomations  InboxAutomation[]
+  aiProviderCredentials AiProviderCredential[]
+  dmLogs            DmLog[]
+  trackedLinks      TrackedLink[]
+  linkClicks        LinkClick[]
+  webhookEvents     WebhookEvent[]
+  operationalEvents OperationalEvent[]
+  apiSnapshots      ApiSnapshot[]
+
+  @@index([ownerId])
+}
+
+model AiProviderCredential {
+  id              String   @id @default(cuid())
+  workspaceId     String
+  provider        String
+  encryptedApiKey String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, provider])
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  permissions WorkspacePermission[] @default([])
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+model WorkspaceInvitation {
+  id              String                    @id @default(cuid())
+  workspaceId     String
+  email           String
+  role            WorkspaceRole             @default(MEMBER)
+  permissions     WorkspacePermission[] @default([])
+  token           String                    @unique
+  status          WorkspaceInvitationStatus @default(PENDING)
+  invitedByUserId String?
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy User?     @relation("WorkspaceInvitationsSent", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, email])
+  @@index([email])
+  @@index([workspaceId])
+  @@index([status])
+}
+
+model InstagramAccount {
+  id                     String    @id @default(cuid())
+  workspaceId            String
+  instagramId            String    @unique
+  username               String
+  name                   String?
+  accessToken            String
+  tokenExpiresAt         DateTime?
+  webhookSubscribed      Boolean   @default(false)
+  fallbackReplyEnabled   Boolean   @default(false)
+  fallbackReplyMessage   String?
+  connectedAt            DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  automations       Automation[]
+  inboxAutomations  InboxAutomation[]
+  dmLogs            DmLog[]
+  linkClicks        LinkClick[]
+  followerSnapshots FollowerSnapshot[]
+  apiSnapshots      ApiSnapshot[]
+
+  @@index([workspaceId])
+}
+
+/// Durable API response snapshots for expensive external reads. These rows are
+/// overwritten by stable keys so repeated Meta-backed dashboard requests share
+/// one cached payload across tabs, browsers, devices, and server instances.
+model ApiSnapshot {
+  id                 String   @id @default(cuid())
+  workspaceId        String
+  instagramAccountId String?
+  key                String   @unique
+  source             String
+  payload            Json
+  fetchedAt          DateTime
+  expiresAt          DateTime
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  instagramAccount InstagramAccount? @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, source, expiresAt])
+  @@index([instagramAccountId, source, expiresAt])
+  @@index([expiresAt])
+}
+
+/// Daily follower total for one account. Instagram only retains ~30 days of
+/// account insights, so history beyond that window exists only because we
+/// record it here. One row per account per day.
+model FollowerSnapshot {
+  id                 String   @id @default(cuid())
+  instagramAccountId String
+  /// Midnight UTC of the day this count belongs to.
+  date               DateTime @db.Date
+  followersCount     Int
+  /// True when the row was reconstructed from follower_count insight deltas
+  /// rather than observed directly, so it can be corrected later.
+  backfilled         Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  instagramAccount InstagramAccount @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([instagramAccountId, date])
+  @@index([instagramAccountId, date])
+}
+
+model Automation {
+  id                 String @id @default(cuid())
+  workspaceId        String
+  instagramAccountId String
+
+  name                    String
+  goal                    String?
+  postId                  String?
+  postUrl                 String?
+  pendingNextReel         Boolean  @default(false)
+  matchAnyPost            Boolean  @default(false)
+  keywords                String[]
+  matchAnyWord            Boolean  @default(false)
+  // Also fire this campaign when someone sends a DM whose text matches the
+  // keywords above. Independent of the post trigger — a DM has no media, so
+  // postId / matchAnyPost do not apply to it.
+  dmTriggerEnabled        Boolean  @default(false)
+  dmMessage               String
+  openingDmEnabled        Boolean  @default(false)
+  openingDmMessage        String?
+  openingDmButtonLabel    String?
+  linkButtonLabel         String?
+  requireFollow           Boolean  @default(false)
+  followPromptMessage     String?
+  followPromptButtonLabel String?
+  followUpEnabled         Boolean  @default(false)
+  followUpMessage         String?
+  // Minutes to wait after the link is delivered before sending the follow-up.
+  // 0 sends it right away.
+  followUpDelayMinutes    Int      @default(0)
+  publicReplyEnabled      Boolean  @default(false)
+  publicReplyMessage      String?
+  publicReplyMessages     String[] @default([])
+  isActive                Boolean  @default(true)
+  wholeWordMatch          Boolean  @default(true)
+  reportShareSlug         String?  @unique
+  reportShareEnabled      Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  instagramAccount InstagramAccount @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+  dmLogs           DmLog[]
+  trackedLinks     TrackedLink[]
+  linkClicks       LinkClick[]
+
+  @@index([workspaceId])
+  @@index([instagramAccountId])
+  @@index([postId])
+}
+
+model DmLog {
+  id                 String  @id @default(cuid())
+  workspaceId        String
+  automationId       String?
+  inboxAutomationId  String?
+  instagramAccountId String
+
+  commenterId    String
+  commenterName  String?
+  commentText    String
+  commentId      String
+  matchedKeyword String?
+  status         DmStatus @default(PENDING)
+  attempts       Int      @default(0)
+  dmSentAt       DateTime?
+  errorMessage   String?
+
+  // AI reply audit (DM-only auto-send tier). Null when the keyword or
+  // catch-all tier handled the message without an LLM call.
+  aiUsed      Boolean?
+  aiModel     String?
+  aiIntent    String?
+  aiLatencyMs Int?
+
+  // The public comment reply is delivered independently of the DM, so its
+  // outcome is tracked separately. publicReplySentAt makes it idempotent across
+  // retries; a DM failure never blocks or re-posts the public reply.
+  publicReplySentAt DateTime?
+  publicReplyError  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  automation       Automation?       @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  inboxAutomation  InboxAutomation?  @relation(fields: [inboxAutomationId], references: [id], onDelete: SetNull)
+  instagramAccount InstagramAccount  @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([automationId, commentId])
+  @@index([workspaceId])
+  @@index([workspaceId, status, createdAt])
+  // Diagnostics: failure list is ordered by last activity (updatedAt), not
+  // creation time, so it needs its own composite.
+  @@index([workspaceId, status, updatedAt])
+  @@index([automationId])
+  @@index([inboxAutomationId])
+  @@index([instagramAccountId])
+  @@index([instagramAccountId, commentId])
+  @@index([status])
+}
+
+/// One master config per Instagram account — simplifies the old multi-rule
+/// (KEYWORD → AI_INTENT → ALWAYS) maze that caused "Heya for price" bugs.
+/// Only two types remain: AI reply (knowledge textbox, plain text, no links)
+/// and a simple fallback (keyword list OR catch-all). One row per account.
+model InboxAutomation {
+  id                 String @id @default(cuid())
+  workspaceId        String
+  instagramAccountId String @unique
+
+  isActive Boolean @default(true)
+
+  // AI tier — grounded by knowledge, DM-only auto-send, 500 char, no RAG.
+  aiEnabled  Boolean @default(false)
+  knowledge  String?
+  aiProvider String?
+  aiModel    String?
+
+  // Fallback tier — simple keyword match or catch-all when keywords empty.
+  fallbackKeywords String[] @default([])
+  fallbackMessage  String   @default("")
+  wholeWordMatch   Boolean  @default(true)
+  matchAnyWord     Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  instagramAccount InstagramAccount @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+  dmLogs           DmLog[]
+
+  @@index([workspaceId])
+}
+
+model TrackedLink {
+  id             String   @id @default(cuid())
+  workspaceId    String
+  automationId   String
+  slug           String   @unique
+  label          String?
+  destinationUrl String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  automation Automation  @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  clicks     LinkClick[]
+
+  @@index([workspaceId])
+  @@index([automationId])
+}
+
+model LinkClick {
+  id                 String   @id @default(cuid())
+  workspaceId        String
+  automationId       String
+  instagramAccountId String
+  trackedLinkId      String
+  ipHash             String?
+  userAgent          String?
+  referrer           String?
+  createdAt          DateTime @default(now())
+
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  automation       Automation       @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  instagramAccount InstagramAccount @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+  trackedLink      TrackedLink      @relation(fields: [trackedLinkId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([automationId])
+  @@index([instagramAccountId])
+  @@index([trackedLinkId])
+  @@index([createdAt])
+  @@index([workspaceId, createdAt])
+}
+
+model WebhookEvent {
+  id           String        @id @default(cuid())
+  workspaceId  String?
+  object       String?
+  payload      Json
+  status       WebhookStatus @default(PENDING)
+  errorMessage String?
+  createdAt    DateTime      @default(now())
+  processedAt  DateTime?
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([status])
+  // Diagnostics: failed events per workspace, newest first.
+  @@index([workspaceId, status, createdAt])
+}
+
+model OperationalEvent {
+  id          String                 @id @default(cuid())
+  workspaceId String?
+  source      OperationalEventSource
+  level       OperationalEventLevel  @default(INFO)
+  message     String
+  payload     Json?
+  createdAt   DateTime               @default(now())
+  resolvedAt  DateTime?
+
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([source])
+  @@index([level])
+  @@index([createdAt])
+  // Diagnostics: token-refresh failures per workspace, newest first.
+  @@index([workspaceId, source, level, createdAt])
+}
+
+enum WorkspaceRole {
+  OWNER
+  MEMBER
+}
+
+enum WorkspacePermission {
+  MANAGE_CAMPAIGNS
+  MANAGE_INBOX_AUTOMATIONS
+  MANAGE_INSTAGRAM_ACCOUNTS
+  MANAGE_MEMBERS
+}
+enum WorkspaceInvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum DmStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED_DEDUP
+  SKIPPED_RATE_LIMIT
+  SKIPPED_PLAN_LIMIT
+  SKIPPED_NO_MATCH
+}
+
+enum WebhookStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+enum OperationalEventSource {
+  WORKER
+  TOKEN_REFRESH
+  HEALTH
+  SYSTEM
+  AI
+}
+
+enum InboxTrigger {
+  KEYWORD
+  AI_INTENT
+  ALWAYS
+}
+
+enum OperationalEventLevel {
+  INFO
+  WARNING
+  ERROR
+}

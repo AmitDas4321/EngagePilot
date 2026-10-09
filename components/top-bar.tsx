@@ -1,0 +1,137 @@
+"use client";
+
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { SignOut } from "@phosphor-icons/react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import { ModeToggle } from "./theme-toggle";
+import { canManageInstagramAccounts, useWorkspaceContext } from "@/lib/workspace-context";
+
+const pageTitles: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/campaigns": "Campaigns",
+  "/campaigns/new": "New Campaign",
+  "/automations": "Campaigns",
+  "/automations/new": "New Campaign",
+  "/logs": "DM Logs",
+  "/settings": "Settings",
+  "/diagnostics": "Diagnostics",
+  "/overview": "Overview",
+  "/inbox": "Inbox",
+};
+
+interface TopBarProps {
+  instagramUsername: string | null;
+  instagramAccountCount: number;
+}
+
+export default function TopBar({
+  instagramUsername,
+  instagramAccountCount,
+}: TopBarProps) {
+  const pathname = usePathname();
+  const title = pageTitles[pathname] ?? "Dashboard";
+  const canManageAccounts = canManageInstagramAccounts(useWorkspaceContext());
+  const [signOutOpen, setSignOutOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  async function confirmSignOut() {
+    setIsSigningOut(true);
+    await signOut({ callbackUrl: "/login" });
+  }
+
+  return (
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 lg:px-4 sticky top-0 w-full z-80">
+      <div className="flex items-center gap-2 justify-center">
+        <SidebarTrigger className="-ml-1" />
+        <Separator
+          orientation="vertical"
+          className="mr-2 data-[orientation=vertical]:h-4"
+        />
+        <h1 className="text-sm font-semibold sm:text-base">{title}</h1>
+      </div>
+
+      <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        {instagramAccountCount > 0 ? (
+          <a
+            href={"https://instagram.com/" + instagramUsername}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 truncate text-sm bg-linear-to-tl from-fuchsia-500 via-red-600 to-orange-400 text-transparent bg-clip-text dark:brightness-135 font-semibold tracking-tight"
+          >
+            {instagramAccountCount > 1
+              ? `${instagramAccountCount} accounts`
+              : `@${instagramUsername}`}
+          </a>
+        ) : canManageAccounts ? (
+          <a
+            href="/api/instagram/connect"
+            className={cn(
+              buttonVariants({ variant: "default", size: "sm" }),
+              "shrink-0 whitespace-nowrap",
+            )}
+          >
+            <span className="sm:hidden">Connect</span>
+            <span className="hidden sm:inline">Connect Instagram</span>
+          </a>
+        ) : null}
+        <ModeToggle />
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => setSignOutOpen(true)}
+          aria-label="Sign out"
+          title="Sign out"
+        >
+          <SignOut className="text-muted-foreground" />
+        </Button>
+      </div>
+
+      <Dialog
+        open={signOutOpen}
+        onOpenChange={(open) => {
+          if (!isSigningOut) setSignOutOpen(open);
+        }}
+      >
+        <DialogContent showCloseButton={!isSigningOut}>
+          <DialogHeader>
+            <DialogTitle>Sign out?</DialogTitle>
+            <DialogDescription>
+              You will return to the sign-in page. Your campaigns and account
+              data will stay unchanged.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSignOutOpen(false)}
+              disabled={isSigningOut}
+            >
+              Stay signed in
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void confirmSignOut()}
+              disabled={isSigningOut}
+            >
+              {isSigningOut ? "Signing out..." : "Sign out"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </header>
+  );
+}

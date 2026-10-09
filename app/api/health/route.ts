@@ -1,0 +1,74 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db/client";
+import { getDiagnosticsOverview } from "@/lib/server/diagnostics";
+
+// Health is cached at the edge for 10 minutes: uptime monitors ping this route
+// every minute or less, and each un-cached hit runs a Postgres `SELECT 1` that
+// keeps Neon's pooled compute awake around the clock — roughly 180 CU-hours a
+// month for a single monitor. The compromise: healthy state can be up to 10
+// minutes stale. Failed (503) responses are never cached, so a real outage is
+// still reported on the next ping, and the 10-minute-old "ok" answer cannot
+// mask a failure for longer than one interval.
+
+type CheckStatus = "ok" | "error";
+
+interface HealthCheck {
+  status: CheckStatus;
+  detail?: string;
+}
+
+async function checkDatabase(): Promise<HealthCheck> {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return { status: "ok" };
+  } catch (error) {
+    return {
+      status: "error",
+      detail: error instanceof Error ? error.message : "Database check failed",
+    };
+  }
+}
+
+export async function GET() {
+  const [database, diagnostics] = await Promise.all([
+    checkDatabase(),
+    getDiagnosticsOverview(),
+  ]);
+
+  const redis: HealthCheck = diagnostics.redisAvailable
+    ? { status: "ok" }
+    : { status: "error", detail: diagnostics.redisError ?? "Redis check failed" };
+  const queue: HealthCheck & { counts?: unknown } = diagnostics.queueCounts
+    ? { status: "ok", counts: diagnostics.queueCounts }
+    : {
+        status: "error",
+        detail: diagnostics.redisError ?? "Queue check failed",
+      };
+  const worker = diagnostics.workerHealth;
+
+  const healthy =
+    database.status === "ok" &&
+    redis.status === "ok" &&
+    queue.status === "ok" &&
+    worker.healthy;
+
+  return NextResponse.json(
+    {
+      status: healthy ? "ok" : "degraded",
+      checks: {
+        database,
+        redis,
+        queue,
+        worker,
+      },
+    },
+    {
+      status: healthy ? 200 : 503,
+      headers: {
+        "Cache-Control": healthy
+          ? "public, s-maxage=3600, stale-while-revalidate=360"
+          : "no-store, must-revalidate",
+      },
+    },
+  );
+}

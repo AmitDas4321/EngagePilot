@@ -1,0 +1,64 @@
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+interface PublicSiteHeaderProps {
+  active?: "home" | "examples";
+}
+
+const navLinks = [
+  { label: "Examples", href: "/instagram-comment-to-dm-examples", key: "examples" },
+  { label: "Agencies", href: "/instagram-dm-automation-agencies", key: "agencies" },
+  { label: "Pricing", href: "/#pricing", key: "pricing" },
+  { label: "Security", href: "/#security", key: "security" },
+];
+
+export default function PublicSiteHeader({ active }: PublicSiteHeaderProps) {
+  return (
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-background/85">
+      <div className="mx-auto flex h-16 w-full max-w-8xl items-center justify-between px-5 sm:px-6 lg:px-8">
+        <Link
+          href="/"
+          className="flex items-center gap-3"
+          aria-label="EngagePilot home"
+        >
+          <span className="text-lg font-bold text-white">EngagePilot</span>
+        </Link>
+
+        <nav className="hidden items-center gap-7 md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.key}
+              href={link.href}
+              className={`text-sm font-medium transition ${
+                active === link.key
+                  ? "text-white"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className="hidden px-4 py-2 text-sm font-semibold text-zinc-300 transition hover:text-white sm:inline-flex"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/login"
+            className={cn(
+              buttonVariants({ variant: "default", size: "sm" }),
+              "bg-cyan-300 text-zinc-950 hover:bg-cyan-200",
+            )}
+          >
+            Start free
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
