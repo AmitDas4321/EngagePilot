@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { SectionHeading } from "@/components/ui/section-heading";
-import img1 from "@/assets/ChatGPT Image Aug 26, 2026, 10_07_44 PM.webp";
-import img2 from "@/assets/ChatGPT Image Aug 26, 2026, 10_09_18 PM.webp";
-import img3 from "@/assets/ChatGPT Image Aug 26, 2026, 10_18_50 PM.webp";
+import img1 from "@/assets/connect-insta.webp";
+import img2 from "@/assets/keywords-and-replies.webp";
+import img3 from "@/assets/It-runs-itself.webp";
 
 const flowSteps = [
   {
