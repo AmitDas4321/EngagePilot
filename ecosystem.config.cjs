@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 
-require("dotenv").config();
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 module.exports = {
   apps: [
     {
-      name: process.env.APP_NAME || "EngagePilot",
-      script: "npm",
-      args: "run start",
+      name: "EngagePilot",
+      script: "node_modules/next/dist/bin/next",
+      args: "start",
       cwd: __dirname,
+      interpreter: "node",
       instances: 1,
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
       env: {
@@ -19,10 +20,12 @@ module.exports = {
     },
     {
       name: "EngagePilot-Worker",
-      script: "npm",
-      args: "run worker",
+      script: "node_modules/tsx/dist/cli.mjs",
+      args: "worker/dm-worker.ts",
       cwd: __dirname,
+      interpreter: "node",
       instances: 1,
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
       env: {
