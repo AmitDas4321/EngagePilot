@@ -13,15 +13,15 @@
 <br>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/AmitDas4321/Open-Insta-DM?style=social)](https://github.com/AmitDas4321/EngagePilot/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/AmitDas4321/Open-Insta-DM?style=social)](https://github.com/AmitDas4321/EngagePilot/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/AmitDas4321/Open-Insta-DM)](https://github.com/AmitDas4321/EngagePilot/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/AmitDas4321/Open-Insta-DM)](https://github.com/AmitDas4321/EngagePilot/pulls)
+[![GitHub stars](https://img.shields.io/github/stars/AmitDas4321/EngagePilot?style=social)](https://github.com/AmitDas4321/EngagePilot/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/AmitDas4321/EngagePilot?style=social)](https://github.com/AmitDas4321/EngagePilot/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/AmitDas4321/EngagePilot)](https://github.com/AmitDas4321/EngagePilot/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/AmitDas4321/EngagePilot)](https://github.com/AmitDas4321/EngagePilot/pulls)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
-[![Last commit](https://img.shields.io/github/last-commit/AmitDas4321/Open-Insta-DM)](https://github.com/AmitDas4321/EngagePilot/commits/main)
-[![Contributors](https://img.shields.io/github/contributors/AmitDas4321/Open-Insta-DM)](https://github.com/AmitDas4321/EngagePilot/graphs/contributors)
-[![Repo size](https://img.shields.io/github/repo-size/AmitDas4321/Open-Insta-DM)](https://github.com/AmitDas4321/EngagePilot)
-[![Commit activity](https://img.shields.io/github/commit-activity/m/AmitDas4321/Open-Insta-DM)](https://github.com/AmitDas4321/EngagePilot/commits/main)
+[![Last commit](https://img.shields.io/github/last-commit/AmitDas4321/EngagePilot)](https://github.com/AmitDas4321/EngagePilot/commits/main)
+[![Contributors](https://img.shields.io/github/contributors/AmitDas4321/EngagePilot)](https://github.com/AmitDas4321/EngagePilot/graphs/contributors)
+[![Repo size](https://img.shields.io/github/repo-size/AmitDas4321/EngagePilot)](https://github.com/AmitDas4321/EngagePilot)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/AmitDas4321/EngagePilot)](https://github.com/AmitDas4321/EngagePilot/commits/main)
 
 <br>
 
@@ -185,9 +185,9 @@ For the complete stack — application libraries, the two runtime processes, and
 
 <a href="https://www.star-history.com/?repos=xeven777%2FEngagePilot&type=timeline&legend=bottom-right">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AmitDas4321/Open-Insta-DM&type=timeline&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AmitDas4321/Open-Insta-DM&type=timeline&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AmitDas4321/Open-Insta-DM&type=timeline&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AmitDas4321/EngagePilot&type=timeline&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AmitDas4321/EngagePilot&type=timeline&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AmitDas4321/EngagePilot&type=timeline&legend=top-left" />
  </picture>
 </a>
 ---
