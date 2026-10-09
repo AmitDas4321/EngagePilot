@@ -71,6 +71,9 @@
   },
   "overrides": {
     "deepmerge-ts": "^8.0.2",
-    "@parcel/watcher": "2.6.0"
+    "@parcel/watcher": "2.6.0",
+    "prisma": {
+      "mysql2": "^3.24.5"
+    }
   }
 }
