@@ -1,3 +1,4 @@
+
 name: Deploy EngagePilot
 
 on:
@@ -34,7 +35,6 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          script_stop: true
           command_timeout: 30m
           script: |
             set -eu
@@ -48,30 +48,16 @@ jobs:
             echo "Installing dependencies..."
             npm ci
 
-            echo "Generating Prisma client..."
-            npm run db:generate
-
-            echo "Applying database migrations..."
-            npm run db:migrate
-
             echo "Building production application..."
             npm run build
 
-            echo "Starting or restarting web application..."
-            if pm2 describe EngagePilot >/dev/null 2>&1; then
-              pm2 restart EngagePilot --update-env
-            else
-              pm2 start npm --name EngagePilot -- start
-            fi
+            echo "Starting PM2 applications..."
+            pm2 start ecosystem.config.cjs
 
-            echo "Starting or restarting DM worker..."
-            if pm2 describe EngagePilot-Worker >/dev/null 2>&1; then
-              pm2 restart EngagePilot-Worker --update-env
-            else
-              pm2 start npm --name EngagePilot-Worker -- run worker
-            fi
-
+            echo "Saving PM2 process list..."
             pm2 save
 
-            echo "Deployment completed."
+            echo "Current PM2 status:"
             pm2 status
+
+            echo "Deployment completed."
