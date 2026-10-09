@@ -763,13 +763,13 @@ chmod +x cloudflared && sudo mv cloudflared /usr/local/bin/
                     <CodeBlock
                       lang="bash"
                       code={`cloudflared login
-cloudflared tunnel create opendm-dev
-cloudflared tunnel route dns opendm-dev dev.yourdomain.com`}
+cloudflared tunnel create engagepilot
+cloudflared tunnel route dns engagepilot dev.yourdomain.com`}
                     />
                     <CodeBlock
                       title="~/.cloudflared/config.yml"
                       lang="yaml"
-                      code={`tunnel: opendm-dev
+                      code={`tunnel: engagepilot
 credentials-file: /home/<you>/.cloudflared/<tunnel-id>.json
 ingress:
   - hostname: dev.yourdomain.com
@@ -778,7 +778,7 @@ ingress:
                     />
                     <CodeBlock
                       lang="bash"
-                      code={`cloudflared tunnel run opendm-dev`}
+                      code={`cloudflared tunnel run engagepilot`}
                     />
                     <CodeBlock
                       lang="env"

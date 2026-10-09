@@ -210,7 +210,7 @@ Requires a free Cloudflare account. Gives you a **stable, named domain** (`*.try
 2. **Create the tunnel** (only once):
 
    ```bash
-   cloudflared tunnel create opendm-dev
+   cloudflared tunnel create engagepilot
    ```
 
    Note the **Tunnel ID** printed in the output.
@@ -218,13 +218,13 @@ Requires a free Cloudflare account. Gives you a **stable, named domain** (`*.try
 3. **Create a DNS record** (only once):
 
    ```bash
-   cloudflared tunnel route dns opendm-dev dev.yourdomain.com
+   cloudflared tunnel route dns engagepilot dev.yourdomain.com
    ```
 
 4. **Create a config file** at `~/.cloudflared/config.yml`:
 
    ```yaml
-   tunnel: opendm-dev
+   tunnel: engagepilot
    credentials-file: /home/<your-user>/.cloudflared/<tunnel-id>.json
 
    ingress:
@@ -236,7 +236,7 @@ Requires a free Cloudflare account. Gives you a **stable, named domain** (`*.try
 5. **Start the tunnel**:
 
    ```bash
-   cloudflared tunnel run opendm-dev
+   cloudflared tunnel run engagepilot
    ```
 
 6. **Update `.env`**:
