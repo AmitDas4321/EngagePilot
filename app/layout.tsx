@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "social media marketing",
     "manychat alternative",
   ],
-  metadataBase: new URL("https://EngagePilot.vercel.app"),
+  metadataBase: new URL("https://engagepilot.blueorbitdevs.org"),
 };
 
 export default function RootLayout({
