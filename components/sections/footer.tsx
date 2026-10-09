@@ -21,7 +21,7 @@ const footerLinks = {
     { label: "Diagnostics", href: "/docs#diagnostics" },
     {
       label: "Dev.to Article",
-      href: "https://dev.to/xeven777/a-free-manychat-alternative-for-instagram-creators-we-built-it-open-source-free-5dlm/",
+      href: "https://dev.to/AmitDas4321/a-free-manychat-alternative-for-instagram-creators-we-built-it-open-source-free-5dlm/",
     },
     {
       label: "AuraDevs Blog",
