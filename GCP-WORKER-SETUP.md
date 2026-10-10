@@ -10,15 +10,15 @@
 
 ## 2. Install PM2
 
-```bash
+```
 npm install -g pm2
 ```
 
 ## 3. Install Dependencies
 
-Project directory-te giye:
+Navigate to the project directory and install the dependencies:
 
-```bash
+```
 cd /root/EngagePilot
 npm ci
 npx prisma generate
@@ -26,19 +26,19 @@ npx prisma generate
 
 ## 4. Environment Variables
 
-Worker-er required environment variables `.env` file-e configure korte hobe, including:
+Configure the required environment variables in the `.env` file, including:
 
 - `DATABASE_URL`
 - Redis/BullMQ connection settings
 - Required API credentials
 
-Secrets GitHub-e commit korbe na.
+Never commit secrets or credentials to GitHub.
 
 ## 5. PM2 Worker Configuration
 
-Create `worker.config.cjs`:
+Create a file named `worker.config.cjs` in the project root:
 
-```javascript
+```
 module.exports = {
   apps: [
     {
@@ -59,44 +59,47 @@ module.exports = {
 };
 ```
 
-## 6. Start Worker
+## 6. Start the Worker
 
-```bash
+Run the following commands:
+
+```
 pm2 start worker.config.cjs
 pm2 save
 pm2 status
 ```
 
-## 7. Logs
+## 7. View and Clear Logs
 
-View worker logs:
+View the worker logs:
 
-```bash
+```
 pm2 logs EngagePilot-Worker --lines 30
 ```
 
-Clear old PM2 logs:
+Clear existing PM2 logs:
 
-```bash
+```
 pm2 flush
 ```
 
-## 8. Restart Worker
+## 8. Restart the Worker
 
-```bash
+```
 pm2 restart EngagePilot-Worker
 ```
 
-## 9. Stop Worker
+## 9. Stop the Worker
 
-```bash
+```
 pm2 stop EngagePilot-Worker
 ```
 
 ## 10. Important Notes
 
-- Worker continuously run korar jonno PM2 use kora hoy.
-- Worker-er imported source files and generated Prisma Client available thakte hobe.
-- Redis connection Vercel application-er queue-r sathe same hote hobe.
-- Database migration deploy korar jonno worker server-e migration command blindly run korbe na.
-- `.env` ebong credentials publicly share korbe na.
+- PM2 keeps the worker running continuously and automatically restarts it if it crashes.
+- All imported source files and the generated Prisma Client must be available on the server.
+- The worker must use the same Redis connection and queue configuration as the Vercel application.
+- Do not run database migration commands blindly on the worker server. Apply migrations through your established deployment process.
+- Never share your `.env` file or expose API keys, database URLs, Redis credentials, or other secrets publicly.
+- Ensure PM2 is configured to start automatically after a server reboot if persistent operation is required.
