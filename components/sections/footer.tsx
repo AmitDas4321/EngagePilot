@@ -21,15 +21,15 @@ const footerLinks = {
     { label: "Diagnostics", href: "/docs#diagnostics" },
     {
       label: "Dev.to Article",
-      href: "https://dev.to/AmitDas4321/a-free-manychat-alternative-for-instagram-creators-we-built-it-open-source-free-5dlm/",
+      href: "https://dev.to/amitdas4321/a-free-manychat-alternative-for-instagram-creators-we-built-it-open-source-free-jca",
     },
     {
-      label: "AuraDevs Blog",
-      href: "https://auradevs.co/blog/EngagePilot/",
+      label: "AmitDas Blog",
+      href: "https://amitdas.site/blog/one-of-the-best-open-source-instagram-dm-automation-tools-engagepilot-is-it-worth-a-try-133",
     },
     {
       label: "Instagram Post",
-      href: "https://www.instagram.com/p/DdEdblhIW5c/",
+      href: "https://www.instagram.com/p/DeV9t_ilLfH/",
     },
   ],
   Legal: [
