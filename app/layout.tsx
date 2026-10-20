@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "social media marketing",
     "manychat alternative",
   ],
-  metadataBase: new URL("https://engagepilot.blueorbitdevs.org"),
+  metadataBase: new URL("https://engagepilot.net"),
 };
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
       <head>
         <meta
           name="google-site-verification"
-          content="1ywEvz4B5lYEEfkF2hEWRlDFzCAVq-5_Qb37AgpM7Wg"
+          content="fO5UoXHouYo2kxDDl-d1_ij0txQCh-d6kpurFb9yjec"
         />
         <meta name="apple-mobile-web-app-title" content="EngagePilot" />
         {/* {process.env.NODE_ENV === "development" && (
