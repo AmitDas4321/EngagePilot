@@ -199,14 +199,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
 ---
 
-## Credits
+## Developers
 
-Built and maintained by **Amit Das** & **Sounodip Ghosh**.
+EngagePilot wouldn't be possible without these incredible contributors. ❤️
 
-- GitHub: [@AmitDas4321](https://github.com/AmitDas4321)
-- Website: [amitdas.site](https://amitdas.site)
-- X: [@AmitDas4321](https://x.com/AmitDas4321)
-- Instagram: [@AmitDas4321](https://instagram.com/AmitDas4321)
+<a href="https://github.com/AmitDas4321/EngagePilot/graphs/contributors">
+  <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
+</a>
 
 ---
 
