@@ -215,6 +215,12 @@ If EngagePilot is useful to you, star it. It is the simplest way to help the pro
 
 ---
 
-## License
+# 📜 License
 
-[MIT](LICENSE).
+This project is licensed under the **MIT License**. See the [`LICENSE`](LICENSE) file for details.
+
+---
+
+<p align="center">
+  <b>Made with ❤️ for the community by <a href="https://amitdas.site">Amit Das</a> | BlueOrbit Devs</b>
+</p>
