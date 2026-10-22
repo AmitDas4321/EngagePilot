@@ -1,11 +1,9 @@
 name: Update Contributors
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
   schedule:
     - cron: "0 0 * * 0" # Every Sunday at midnight UTC
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,7 +23,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      # Create the file if it doesn't exist
       - name: Create SVG placeholder
         run: |
           if [ ! -f CONTRIBUTORS.svg ]; then
